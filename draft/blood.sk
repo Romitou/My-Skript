@@ -1,0 +1,15 @@
+# This script is licensed under the GNU General Public License v2.0 (https://github.com/Romitou/skript/blob/master/LICENSE).
+# Please read README.md before use (https://github.com/Romitou/skript/blob/master/README.md).
+
+on damage:
+	set {_r} to random integer between 1 and 2
+	play raw sound "ITEM_SHIELD_BREAK" at attacker with pitch {_r} volume 100
+	if {_r} = 1:
+		set {_loc} to location 1 right and 2 up victim
+	if {_r} = 2:
+		set {_loc} to location 1 left and 2 up victim
+	create new hologram with line "&c-%damage%" at {_loc} and store in {_test}
+	wait 2 ticks
+	drawDot count 5, particle "blockcrack", material redstone block, XYZ 0, 0, 0, center victim, visibleRange 320, pulseDelay 0, keepFor 5 ticks
+	wait 4 ticks
+	delete hologram {_test}

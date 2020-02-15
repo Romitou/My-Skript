@@ -1,3 +1,12 @@
+#   /$$   /$$           /$$            /$$$$$$  /$$       V1.1        /$$        | Ce script requiert Sk-NBeeT, permettant de gérer les NBT des entités sur votre serveur.
+#  | $$  | $$          | $$           /$$__  $$| $$                  | $$        | Bien évidemment, il vous faudra de même avoir une version de Skript compatible avec celui-ci.
+#  | $$  | $$  /$$$$$$ | $$  /$$$$$$ | $$  \__/| $$$$$$$   /$$$$$$  /$$$$$$      |
+#  | $$$$$$$$ /$$__  $$| $$ /$$__  $$| $$      | $$__  $$ |____  $$|_  $$_/      | Il a été créé à la demande d'un utilisateur de Skript-MC, je le publie donc au public
+#  | $$__  $$| $$  \ $$| $$| $$  \ $$| $$      | $$  \ $$  /$$$$$$$  | $$        | dans les ressources de Skript-MC (https://skript-mc.fr/forum/files/file/310-holochat-affichez-votre-message-au-dessus-de-votre-tête/).
+#  | $$  | $$| $$  | $$| $$| $$  | $$| $$    $$| $$  | $$ /$$__  $$  | $$ /$$    |
+#  | $$  | $$|  $$$$$$/| $$|  $$$$$$/|  $$$$$$/| $$  | $$|  $$$$$$$  |  $$$$/    | Si toutesfois, vous souhaitez adresser une suggestion ou si vous avez un problème, n'hésitez
+#  |__/  |__/ \______/ |__/ \______/  \______/ |__/  |__/ \_______/   \___/      | pas à me contacter sur le Discord de Skript-MC ou sur mon compte personnel (Romitou#9685).
+
 on load:
     if {holo::d} is not set:
         set {holo::d} to 1 tick

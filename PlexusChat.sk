@@ -1,0 +1,350 @@
+# This script is licensed under the GNU General Public License v2.0 (https://github.com/Romitou/skript/blob/master/LICENSE).
+# Please read README.md before use (https://github.com/Romitou/skript/blob/master/README.md).
+
+on chat:
+	cancel event
+	if PLEXUS_MOD_CHECK("mute", player) is true:
+		stop
+	set {_msg} to PLEXUS_CHAT(player, message)
+	if {_msg} is not set:
+		stop
+	send formatted "%{_msg}%" to all players
+
+on connect:
+	PLEXUS_MISC_INITIALIZE(player)
+
+function PLEXUS_MISC_INITIALIZE(p: player):
+	load yaml "plugins/Plexus/players/%{_p}%.yml" as "player"
+	if yaml value "FIRSTJOIN" of "player" is not set:
+		set yaml value "FIRSTJOIN" of "player" to "%now%"
+		set yaml value "REPUTATION.GOOD" of "player" to 0
+		set yaml value "REPUTATION.BAD" of "player" to 0
+		set yaml value "CHAT.PREFIX" of "player" to "&7Joueur"
+		set yaml value "CHAT.COLOR" of "player" to "&7"
+		set yaml value "CHAT.TRUSTED" of "player" to "nothing"
+		set yaml value "MONEY.FREE" of "player" to 0
+		set yaml value "MONEY.PREM" of "player" to 0
+		set yaml value "MODERATION.BAN" of "player" to false
+		set yaml value "MODERATION.TEMPBAN" of "player" to false
+		set yaml value "MODERATION.MUTE" of "player" to false
+		set yaml value "MODERATION.TEMPMUTE" of "player" to false
+	save yaml "player"
+	unload yaml "player"
+
+function PLEXUS_GET(p: player, yaml: text) :: text:
+	load yaml "plugins/Plexus/players/%{_p}%.yml" as "player"
+	return yaml value "%{_yaml}%" of "player"
+
+function PLEXUS_GET_REPUTATION(p: player) :: integer:
+	load yaml "plugins/Plexus/players/%{_p}%.yml" as "player"
+	set {_rg} to yaml value "REPUTATION.GOOD" of "player"
+	set {_rb} to yaml value "REPUTATION.BAD" of "player"
+	save yaml "player"
+	unload yaml "player"
+	return round({_rg} / ({_rg} + {_rb}) * 100)
+
+function PLEXUS_CHAT(p: player, msg: text) :: text:
+	set {_now} to "%now%"
+	set {_pl} to "%{_p}%"
+	set {_now::*} to {_now} split at " "
+	set {_pla} to first character of {_pl}
+	replace all "/" with "" in {_now::1}
+	load yaml "plugins/Plexus/chat/%{_now::1}%.yml" as "chat"
+	set {_id} to "%{_pla}%%random integer between 0 and 9%%random integer between 0 and 9%%random integer between 0 and 9%%random integer between 0 and 9%%random integer between 0 and 9%"
+	set yaml value "%{_id}%.message" of "chat" to {_msg}
+	set yaml value "%{_id}%.author" of "chat" to "%{_p}%"
+	set yaml value "%{_id}%.hour" of "chat" to "%{_now::2}%"
+	save yaml "chat"
+	unload yaml "chat"
+	if PLEXUS_GET({_p}, "CHAT.TRUSTED") is "nothing":
+		if PLEXUS_CHAT_EVALUATE({_id}, {_p}, {_msg}) is false:
+			stop
+	set {_prefix} to PLEXUS_GET({_p}, "CHAT.PREFIX")
+	set {_color} to PLEXUS_GET({_p}, "CHAT.COLOR")
+	if PLEXUS_GET({_p}, "CHAT.TRUSTED") is "nothing":
+		set {_u} to "<tooltip:&6Signaler à Plexus%nl%&8Identifiant: &7##%{_id}%><command:/report plexus start %{_p}% %{_id}%>&6♦ "
+	else:
+		set {_u} to ""
+	return "%{_u}%%{_prefix}% %{_p}% &8»%{_color}% %{_msg}%"
+
+command /report [<text>] [<text>] [<offline player>] [<text>]:
+	trigger:
+		if arg 1 is "plexus":
+			if arg 2 is "start":
+				if arg 3 is set:
+					if arg 4 is set:
+						load yaml "plugins/Plexus/reports/list.yml" as "list"
+						set {_list::*} to yaml list "list" of "list"
+						save "list"
+						unload "list"
+						if {_list::*} contains arg 4:
+							send "&6[Plexus]&f Ce message a déjà été &csignalé&f."
+							stop
+						set {_now} to "%now%"
+						set {_now::*} to {_now} split at " "
+						replace all "/" with "" in {_now::1}
+						load yaml "plugins/Plexus/chat/%{_now::1}%.yml" as "chat"
+						if yaml value arg 4 of "chat" exists:
+							set {report::%player%} to arg 4
+						send "&6[Plexus]&f Merci pour votre signalement : afin de finaliser l'envoi, ajoutez un commentaire avec &e/comment <votre commentaire>&f."
+							
+
+command /comment [<text>]:
+	trigger:
+		if {report::%player%} is set:
+			load yaml "plugins/Plexus/chat/%{_now::1}%.yml" as "chat"
+			set {_message} to yaml value "%{report::%player%}%.message" of "chat"
+			set {_author} to yaml value "%{report::%player%}%.author" of "chat"
+			unload "chat"
+			PLEXUS_CHAT_REPORT({report::%player%}, {_author}, player, {_message}, arg-1)
+			send "&6[Plexus]&f Merci pour votre signalement. Vous serez informé lorsqu'il aura été traité."
+			clear {report::%player%}
+			
+function PLEXUS_CHAT_EVALUATE(id: text, p: player, msg: text) :: boolean:
+	load yaml "plugins/Plexus/chat_config.yml" as "config"
+	set {_sensibility} to yaml value "sensibility" of "config"
+	set {_words::*} to yaml list "words" of "config"
+	set {_message::*} to {_msg} split at " "
+	loop {_message::*}:
+		if {_last} is loop-value:
+			add loop-value to {_detect::*}
+			add 1 to {_violation}
+		set {_last} to loop-value
+		if size of {_detect::*} = 2:
+			add "Répétitions" to {_analyse::*}
+		loop {_words::*}:
+			if loop-value-1 contains loop-value-2:
+				add loop-value-1 to {_detect::*}
+				add (length of loop-value-1 * 0.50) + 2 to {_violation}
+				set {_word} to true
+	if {_word} is true:
+		add "Mots incorrects" to {_analyse::*}
+	set {_length} to length of regex replace "[^A-Z]" with "" in {_msg}
+	if {_length} >= 3:
+		add "Majuscules" to {_analyse::*}
+	add round({_length} * 0.20) to {_violation}
+	set {_plexus} to round({_violation} * {_sensibility} / length of {_msg} * 100)
+	if {_plexus} > 10:
+		PLEXUS_CHAT_REPORT_X({_id}, {_p}, {_msg}, {_detect::*}, {_analyse::*}, {_plexus})
+		send formatted "&6[Plexus]&8[%{_id}%&8.%{_plexus}%&8]&f Votre message nécessite une validation manuelle par notre équipe de modération &6Plexus&f avant d'être envoyé. &7Pour en savoir plus sur nos contrôles, <cmd:/info plexus>&ocliquez ici<reset>&7." to {_p}
+		return false
+	else:
+		set {_prcent} to PLEXUS_GET_REPUTATION({_p})
+		set {_chance} to 100 - {_prcent}
+		chance of {_chance}%:
+			PLEXUS_CHAT_REPORT_G({_id}, {_p}, {_msg})
+			send formatted "&6[Plexus]&8[%{_id}%&8.%{_plexus}%&8]&f Votre message nécessite une validation manuelle par notre équipe de modération &6Plexus&f avant d'être envoyé. &7Pour en savoir plus sur nos contrôles, <cmd:/info plexus>&ocliquez ici<reset>&7." to {_p}
+			return false
+			stop
+		return true
+
+function PLEXUS_CHAT_REPORT(id: text, a: player, c: player, msg: text, comment: text):
+	set {_now} to "%now%"
+	set {_now::*} to {_now} split at " "
+	replace all "/" with "" in {_now::1}
+	load yaml "plugins/Plexus/reports/%{_id}%.yml" as "report"
+	set yaml value "date" of "report" to "%now%"
+	set yaml value "creator" of "report" to "%{_c}%"
+	set yaml value "author" of "report" to "%{_a}%"
+	set yaml value "message" of "report" to "%{_msg}%"
+	set yaml value "commentary" of "report" to "%{_comment}%"
+	save yaml "report"
+	unload "report"
+	load yaml "plugins/Plexus/reports/list.yml" as "list"
+	set {_list::*} to yaml list "list" of "list"
+	add {_id} to {_list::*}
+	set yaml list "list" of "list" to {_list::*}
+	save "list"
+	unload "list"
+	send "&6Plexus:&7 [D:%now%] [C:%{_c}%] [A:%{_a}%] [M:%{_msg}%] [C:%{_comment}%]" to console
+
+function PLEXUS_CHAT_REPORT_G(id: text, p: player, msg: text):
+	set {_now} to "%now%"
+	set {_now::*} to {_now} split at " "
+	replace all "/" with "" in {_now::1}
+	load yaml "plugins/Plexus/reports/%{_id}%.yml" as "report"
+	set yaml value "date" of "report" to "%now%"
+	set yaml value "creator" of "report" to "PLX"
+	set yaml value "author" of "report" to "%{_p}%"
+	set yaml value "message" of "report" to "%{_msg}%"
+	set yaml list "detect" of "report" to ""
+	set yaml list "scan" of "report" to ""
+	set yaml value "trust" of "report" to "Demande aléatoire"
+	save yaml "report"
+	unload "report"
+	load yaml "plugins/Plexus/reports/list.yml" as "list"
+	set {_list::*} to yaml list "list" of "list"
+	add {_id} to {_list::*}
+	set yaml list "list" of "list" to {_list::*}
+	save "list"
+	unload "list"
+	send "&6Plexus:&7 [D:%now%] [C:&cPLX&7] [A:%{_a}%] [M:%{_msg}%]" to console
+
+function PLEXUS_CHAT_REPORT_X(id: text, p: player, msg: text, detect: objects, scan: objects, plexus: integer):
+	set {_now} to "%now%"
+	set {_now::*} to {_now} split at " "
+	replace all "/" with "" in {_now::1}
+	load yaml "plugins/Plexus/reports/%{_id}%.yml" as "report"
+	set yaml value "date" of "report" to "%now%"
+	set yaml value "creator" of "report" to "PLX"
+	set yaml value "author" of "report" to "%{_p}%"
+	set yaml value "message" of "report" to "%{_msg}%"
+	set yaml list "detect" of "report" to {_detect::*}
+	set yaml list "scan" of "report" to {_scan::*}
+	set yaml value "trust" of "report" to "%{_plexus}%"
+	save yaml "report"
+	unload "report"
+	load yaml "plugins/Plexus/reports/list.yml" as "list"
+	set {_list::*} to yaml list "list" of "list"
+	add {_id} to {_list::*}
+	set yaml list "list" of "list" to {_list::*}
+	save "list"
+	unload "list"
+
+function PLEXUS_CHAT_MOD_GUI(id: text, p: player):
+	if file "plugins/Plexus/reports/%{_id}%.yml" is not available:
+		send "&6[Plexus]&8[##%{_id}%&8]&f Cet identifiant est invalide." to {_p}
+		stop
+	load yaml "plugins/Plexus/reports/%{_id}%.yml" as "report"
+	set {_date} to yaml value "date" of "report" # [OK]
+	set {_creator_yaml} to yaml value "creator" of "report" # [OK]
+	set {_creator} to {_creator_yaml} parsed as player # [OK]
+	set {_author_yaml} to yaml value "author" of "report" # [OK]
+	set {_author} to {_author_yaml} parsed as player # [OK]
+	set {_message} to yaml value "message" of "report" # [OK]
+	set {_detect::*} to yaml list "detect" of "report" # [OK]
+	set {_scan::*} to yaml list "scan" of "report" # [OK]
+	set {_detection} to "%{_detect::*}%" # [OK]
+	set {_scan} to "%{_scan::*}%" # [OK]
+	set {_trust} to yaml value "trust" of "report" # [OK]
+	set {_issue} to yaml value "issue" of "report" # [OK]
+	replace all ", " and " and " with "&7 - &e" in {_detection}
+	replace all ", " and " and " with "&7 - &e" in {_scan}
+	open virtual chest inventory with 6 rows named "Vérifications PLX &8(##%{_id}%)" to {_p}
+
+	
+	if {_creator_yaml} is "PLX":
+		format gui slot 19 of {_p} with totem of undying named "&6Demandé automatiquement par Plexus" with lore "", "&7Aléatoirement ou si l'algorithme détecte un message", "&7malveillant, une vérification est demandée par &ePlexus&7." and ""
+		if {_trust} is between 0 and 2:
+			set {_presemption} to "&2bienveillant"
+		if {_trust} is between 3 and 5:
+			set {_presemption} to "&acorrect"
+		if {_trust} is between 6 and 15:
+			set {_presemption} to "&eneutre"
+		if {_trust} is between 16 and 80:
+			set {_presemption} to "&6incorrect"
+		if {_trust} >= 81:
+			set {_presemption} to "&cmalveillant"
+		format gui slot 21 of {_p} with shield named "&6Présomption de l'algorithme" with lore "", "&6>&f Évaluation: %{_presemption}%", "&6>&f Indice de sûreté: &e%{_trust}%", "", "&7Cettre présomption est estimée", "&7par l'algorithme de &ePlexus&7." and ""
+		format gui slot 20 of {_p} with enchanted book named "&6Éléments joints à la vérification" with lore "", "&6>&f Infractions relevées:&e %{_scan}%", "&6> &fÉléments relevés: &e%{_detection}%", "", "&7Certains éléments du message peuvent être relevés par", "&7l'algorithme afin d'aider la validation du signalement." and ""
+		
+	else:
+		format gui slot 19 of {_p} with head of {_creator} named "&6Auteur du signalement" with lore "", "&6>&f Joueur: &e%{_creator}%", "&6>&f Réputation: &e%PLEXUS_GET_REPUTATION({_creator})%%%", "", "&7Ce signalement a été demandé manuellement par un joueur du", "&7serveur. Ce joueur sera informé de l'issue du signalement." and ""
+	
+	format gui slot 23 of {_p} with head of {_author} named "&6Auteur de l'infraction" with lore "", "&6>&f Joueur: &e%{_author}%", "&6>&f Réputation: &e%PLEXUS_GET_REPUTATION({_author})%%%", "", "&7Le profil du joueur ne doit pas influencer", "&7votre choix d'évaluation du message." and ""
+	format gui slot 24 of {_p} with paper named "&6Informations sur le signalement" with lore "", "&6>&f Date: &e%{_date}%", "&6> &fMessage:&e %{_message}%" and ""
+	format gui slot 25 of {_p} with cobweb named "&7Fonctionnalité en cours de développement..."
+	
+	# Partie non flexible
+	format gui slot (integers between 9 and 17), (integers between 44 and 53), (integers between 28 and 34), 18, 27, 36, 22, 31, 26, 35 and 45 of {_p} with gray stained glass pane named " "
+	format gui slot 37 of {_p} with green dye named "&2Message bienveillant" with lore "", "&7Ce message est bien plus que correct, il est", "&7bienveillant envers les autres joueurs." and "" to run function PLEXUS_CHAT_EVAL("B", {_p}, {_author}, {_id})
+	format gui slot 38 of {_p} with light green dye named "&aMessage correct" with lore "", "&7Ce message est normal, il ne contient aucun", "&7propos pouvant être considéré comme incorrect." and "" to run function PLEXUS_CHAT_EVAL("C", {_p}, {_author}, {_id})
+	format gui slot 40 of {_p} with yellow dye named "&eMessage neutre" with lore "", "&7Ce message peut être correct comme incorrect. Il est", "&7préférable de le qualifier comme neutre dans ce cas." and "" to run function PLEXUS_CHAT_EVAL("N", {_p}, {_author}, {_id})
+	format gui slot 42 of {_p} with orange dye named "&6Message incorrect" with lore "", "&7Ce message contient des propos inappropriés ou", "&7pouvant choquer les joueurs. Vérifiez le contexte." and "" to run function PLEXUS_CHAT_EVAL("I", {_p}, {_author}, {_id})
+	format gui slot 43 of {_p} with red dye named "&cMessage malveillant" with lore "", "&7Ce message est bien plus qu'incorrect, il est", "&7malveillant envers les autres joueurs." and "" to run function PLEXUS_CHAT_EVAL("M", {_p}, {_author}, {_id})
+
+	if {_issue} is "B":
+		format gui slot 46 of {_p} with green glass pane named "&2Message déjà évalué"	
+	if {_issue} is "C":
+		format gui slot 47 of {_p} with light green glass pane named "&aMessage déjà évalué"	
+	if {_issue} is "N":
+		format gui slot 49 of {_p} with yellow glass pane named "&eMessage déjà évalué"	
+	if {_issue} is "I":
+		format gui slot 51 of {_p} with orange glass pane named "&6Message déjà évalué"	
+	if {_issue} is "M":
+		format gui slot 52 of {_p} with red glass pane named "&cMessage déjà évalué"
+
+function PLEXUS_CHAT_EVAL(eval: text, p: player, author: player, id: text):
+	load yaml "plugins/Plexus/reports/%{_id}%.yml" as "report"
+	if value "issue" of "report" is set:
+		save yaml "report"
+		unload "report"
+		stop
+	if {_eval} is "B":
+		set {_rating} to "&2bienveillant"
+		set {_public} to "Votre message a bien été publié."
+		set {_msg} to "Merci de contribuer à un environnement de jeu agréable pour tous, nous vous en sommes reconnaissant."
+		set {_good} to 3
+	if {_eval} is "C":
+		set {_rating} to "&acorrect"
+		set {_public} to "Votre message a donc bien été publié."
+		set {_msg} to "Votre message respecte l'ensemble de nos règles."
+		set {_good} to 1
+	if {_eval} is "N":
+		set {_rating} to "&eneutre"
+		set {_public} to "En conséquent, votre message n'a pas été publié."
+		set {_msg} to "Votre message étant ambigu, nous préférons ne pas l'évaluer."
+	if {_eval} is "I":
+		set {_rating} to "&6incorrect"
+		set {_public} to "En conséquent, votre message n'a pas été publié."
+		set {_msg} to "Votre message ne respecte pas notre règlement. Merci de revoir votre comportement afin d'éviter d'éventuelles futures sanctions."
+		set {_bad} to 3
+	if {_eval} is "M":
+		set {_rating} to "&cmalveillant"
+		set {_public} to "En conséquent, vos prochains messages ne seront pas publiés."
+		set {_msg} to "Votre message ne respecte pas notre règlement. Une sanction va vous être appliquée prochainement."
+		set {_bad} to 7
+	send "&6&m                                             &6" to {_author}
+	send "" to {_author}
+	send "&6[Plexus]&8[##%{_id}%&8]&f Votre message vient d'être vérifié par notre équipe de modération &6Plexus&f, qui l'a classé comme %{_rating}%&f." to {_author}
+	send "" to {_author}
+	send "&7Note: %{_msg}% &7%{_public}%" to {_author}
+	send "" to {_author}
+	send "&6&m                                             &6" to {_author}
+	
+	set value "issue" of "report" to {_eval}
+	set value "moderator" of "report" to {_p}
+	save yaml "report"
+	unload "report"
+	
+	load yaml "plugins/Plexus/reports/list.yml" as "list"
+	set {_list::*} to yaml list "list" of "list"
+	remove {_id} from {_list::*}
+	set yaml list "list" of "list" to {_list::*}
+	save "list"
+	unload "list"
+	
+	set {_author1} to "%{_author}%"
+	load yaml "plugins/Plexus/players/%{_author1}%.yml" as "player"
+	if {_good} is set:
+		set {_g} to yaml value "REPUTATION.GOOD" of "player"
+		add {_good} to {_g}
+		set yaml value "REPUTATION.GOOD" of "player" to {_g}
+	if {_bad} is set:
+		set {_b} to yaml value "REPUTATION.BAD" of "player"
+		add {_bad} to {_b}
+		set yaml value "REPUTATION.BAD" of "player" to {_b}
+	save yaml "player"
+	unload yaml "player"
+	
+	send "&6[Plexus]&8[##%{_id}%&8]&f Évaluation enregistrée avec &asuccès&f." to {_p}
+	close {_p}'s inventory
+	wait 1 second
+	send "&6[Plexus]&f Recherche d'un nouveau signalement ..." to {_p}
+	wait 10 ticks
+	make {_p} execute command "/verif"
+	
+command /verif [<text>]:
+	trigger:
+		if arg-1 is not set:
+			set {_id} to PLEXUS_CHAT_MOD_SEARCH()
+			if {_id} is "<none>":
+				send "&6[Plexus]&f Désolé, aucun rapport n'a été trouvé."
+				stop
+			PLEXUS_CHAT_MOD_GUI({_id}, player)
+			stop
+		PLEXUS_CHAT_MOD_GUI(arg-1, player)
+function PLEXUS_CHAT_MOD_SEARCH() :: text:
+	load yaml "plugins/Plexus/reports/list.yml" as "list"
+	set {_list::*} to yaml list "list" of "list"
+	return "%random element out of {_list::*}%"

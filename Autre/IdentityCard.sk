@@ -4,6 +4,7 @@ on chat:
 		if message contains "stop":
 			clear {ci::%player%}
 			send "&6[&eCarte d'identité&6]&f Arrêt de la procédure de création d'une carte d'identité ..."
+			stop
 		if {ci::%player%} is 1:
 			set {ci::%player%::familyname} to uncolored message
 			send "&6[&eCarte d'identité&6]&f Quel est votre prénom ?"

@@ -1,0 +1,30 @@
+options:
+	prefix: &6[&eCoinFlip&6]&f
+	rolling: Suspense ... Mise de 
+	win: Bravo, tu as gagné 
+	lost: Dommage, tu as perdu 
+	couldwin: Tu aurais pu gagner 
+	bet_invalid: Tu ne peux pas miser cette somme.
+	notenough: Tu n'as pas assez d'argent pour faire ceci.
+	money: €
+	min_bet: 10
+	max_bet: 100
+
+command /bet [<integer>]:
+	trigger:
+		if arg-1 is between {@min_bet} and {@max_bet}:
+			if player's balance is more than or equal to arg 1:
+				send "{@prefix} {@rolling} %arg-1%{@money}"
+				wait 2 seconds
+				set {_flip} to random integer between 1 and 2
+				set {_win} to arg 1 * 2
+				if {_flip} is 1:
+					send "{@prefix} {@win} %{_win}%{@money} !"
+					add {_win} to balance of player
+				else if {_flip} is 2:
+					send "{@prefix} {@lost} %arg-1%{@money} !"
+					send "&7{@couldwin} %{_win}%&7{@money} !"
+			else:
+				send "{@prefix} {@notenough}"
+		else:
+			send "{@prefix} {@bet_invalid} &7(entre {@min_bet} et {@max_bet})"

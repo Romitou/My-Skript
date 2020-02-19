@@ -1,0 +1,31 @@
+on chat:
+	if {ci::%player%} is set:
+		cancel event
+		if message contains "stop":
+			clear {ci::%player%}
+			send "&6[&eCarte d'identité&6]&f Arrêt de la procédure de création d'une carte d'identité ..."
+		if {ci::%player%} is 1:
+			set {ci::%player%::familyname} to uncolored message
+			send "&6[&eCarte d'identité&6]&f Quel est votre prénom ?"
+		else if {ci::%player%} is 2:
+			set {ci::%player%::name} to uncolored message
+			send "&6[&eCarte d'identité&6]&f Quel est votre âge ?"
+		else if {ci::%player%} is 3:
+			set {ci::%player%::age} to uncolored message
+			send "&6[&eCarte d'identité&6]&f Quel est votre matricule ?"
+		else if {ci::%player%} is 4:
+			set {ci::%player%::matricule} to uncolored message
+			send "&6[&eCarte d'identité&6]&f Finalisation de la procédure de création d'une carte d'identité ... Pour la récupérer, tapez &e/ci&f."
+		else:
+			send "&6[&eCarte d'identité&6]&f Votre carte d'identité est prête ! Pour la récupérer, tapez &e/ci&f."
+		add 1 to {ci::%player%}
+command /ci:
+	trigger:
+		if {ci::%player%} is set:
+			give paper named "&6Carte d'identité" with lore "&eNom:&7 %{ci::%player%::familyname}%", "&ePrénom: &7%{ci::%player%::name}%", "&eÂge: &7%{ci::%player%::age}%" and "&eMatricule:&7 %{ci::%player%::matricule}%" to player
+			clear {ci::%player%}
+		else:
+			set {ci::%player%} to 1
+			send "&6[&eCarte d'identité&6]&f Début de la procédure de création d'une carte d'identité ..."
+			wait 1 second
+			send "&6[&eCarte d'identité&6]&f Quel est votre nom de famille ?"

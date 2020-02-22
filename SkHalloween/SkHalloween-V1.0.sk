@@ -1,0 +1,504 @@
+# SkHalloween - 1.20
+
+#    SSSSSSSSSSSSSSS kkkkkkkk           HHHHHHHHH     HHHHHHHHH                  lllllll lllllll                                                                                                                
+#  SS:::::::::::::::Sk::::::k           H:::::::H     H:::::::H                  l:::::l l:::::l      Ce programme Skript a été programmé par Romitou(#9685).	|	Ce Skript a été créé à l'occasion du
+# S:::::SSSSSS::::::Sk::::::k           H:::::::H     H:::::::H                  l:::::l l:::::l      Vous pouvez me contacter via Discord ou sur Skript-MC.	|	concours sur le thème d'Halloween.
+# S:::::S     SSSSSSSk::::::k           HH::::::H     H::::::HH                  l:::::l l:::::l                                                                                                                
+# S:::::S             k:::::k    kkkkkkk  H:::::H     H:::::H    aaaaaaaaaaaaa    l::::l  l::::l    ooooooooooo wwwwwww           wwwww           wwwwwww eeeeeeeeeeee        eeeeeeeeeeee    nnnn  nnnnnnnn    
+# S:::::S             k:::::k   k:::::k   H:::::H     H:::::H    a::::::::::::a   l::::l  l::::l  oo:::::::::::oow:::::w         w:::::w         w:::::wee::::::::::::ee    ee::::::::::::ee  n:::nn::::::::nn  
+#  S::::SSSS          k:::::k  k:::::k    H::::::HHHHH::::::H    aaaaaaaaa:::::a  l::::l  l::::l o:::::::::::::::ow:::::w       w:::::::w       w:::::we::::::eeeee:::::ee e::::::eeeee:::::een::::::::::::::nn 
+#   SS::::::SSSSS     k:::::k k:::::k     H:::::::::::::::::H             a::::a  l::::l  l::::l o:::::ooooo:::::o w:::::w     w:::::::::w     w:::::we::::::e     e:::::ee::::::e     e:::::enn:::::::::::::::n
+#     SSS::::::::SS   k::::::k:::::k      H:::::::::::::::::H      aaaaaaa:::::a  l::::l  l::::l o::::o     o::::o  w:::::w   w:::::w:::::w   w:::::w e:::::::eeeee::::::ee:::::::eeeee::::::e  n:::::nnnn:::::n
+#        SSSSSS::::S  k:::::::::::k       H::::::HHHHH::::::H    aa::::::::::::a  l::::l  l::::l o::::o     o::::o   w:::::w w:::::w w:::::w w:::::w  e:::::::::::::::::e e:::::::::::::::::e   n::::n    n::::n
+#             S:::::S k:::::::::::k       H:::::H     H:::::H   a::::aaaa::::::a  l::::l  l::::l o::::o     o::::o    w:::::w:::::w   w:::::w:::::w   e::::::eeeeeeeeeee  e::::::eeeeeeeeeee    n::::n    n::::n
+#             S:::::S k::::::k:::::k      H:::::H     H:::::H  a::::a    a:::::a  l::::l  l::::l o::::o     o::::o     w:::::::::w     w:::::::::w    e:::::::e           e:::::::e             n::::n    n::::n
+# SSSSSSS     S:::::Sk::::::k k:::::k   HH::::::H     H::::::HHa::::a    a:::::a l::::::ll::::::lo:::::ooooo:::::o      w:::::::w       w:::::::w     e::::::::e          e::::::::e            n::::n    n::::n
+# S::::::SSSSSS:::::Sk::::::k  k:::::k  H:::::::H     H:::::::Ha:::::aaaa::::::a l::::::ll::::::lo:::::::::::::::o       w:::::w         w:::::w       e::::::::eeeeeeee   e::::::::eeeeeeee    n::::n    n::::n
+# S:::::::::::::::SS k::::::k   k:::::k H:::::::H     H:::::::H a::::::::::aa:::al::::::ll::::::l oo:::::::::::oo         w:::w           w:::w         ee:::::::::::::e    ee:::::::::::::e    n::::n    n::::n
+#  SSSSSSSSSSSSSSS   kkkkkkkk    kkkkkkkHHHHHHHHH     HHHHHHHHH  aaaaaaaaaa  aaaallllllllllllllll   ooooooooooo            www             www            eeeeeeeeeeeeee      eeeeeeeeeeeeee    nnnnnn    nnnnnn
+
+on load:
+	# Réinitialisation des temps de rechargement
+	clear {h::cooldown::*}
+	
+	# Création de la recette pour l'oeuf de Dauphin Mignon
+	set {_crystal} to diamond named "&bCristal"
+	set {_egg} to dolphin egg named "&cD&aa&eu&6p&dh&bi&en &eM&bi&dg&cn&ao&6n" with lore "", "&7Owh, un dauphin ! Il a l'air d'être mignon ?", "&7Invoquez-le, il ne vous fera pas de mal. :)", "", "&8/halloween pour plus d'informations" and ""
+	register new shaped recipe for {_egg} using {_crystal}, {_crystal}, {_crystal}, {_crystal}, emerald, {_crystal}, {_crystal}, {_crystal}, {_crystal}
+
+#--------------------------------------------------------------------------------- FONCTIONS ---------------------------------------------------------------------------------
+
+function getLevel(p: player) :: text:
+	# PROGRESS - 1
+	set {_progress::1} to round({h::pumpkin::%{_p}%} / 3 * 100)
+		
+	# PROGRESS - 2
+	if {h::invo::%{_p}%} is not set:
+		set {_progress::2} to 0
+	else:
+		set {_progress::2} to 100
+		
+	# PROGRESS - 3
+	set {_progress::3} to round({h::kill::%{_p}%} / 2 * 100)
+		
+	# PROGRESS - 4
+	set {_progress::4} to round({h::diamond::%{_p}%} / 80 * 100)
+		
+	# PROGRESS - 5
+	if {h::craft::%{_p}%} is not set:
+		set {_progress::5} to 0
+	else:
+		set {_progress::5} to 100
+		
+	# PROGRESS - 6
+	if {h::spawn::%{_p}%} is not set:
+		set {_progress::6} to 0
+	else:
+		set {_progress::6} to 100
+		
+	# PROGRESS - 7
+	if {h::god::%{_p}%} is not set:
+		set {_progress::7} to 0
+	else:
+		set {_progress::7} to 100
+		
+	#PROGRESS - DETECT
+	set {_loop} to 1
+	loop 7 times:
+		if {_progress::%{_loop}%} is greater or equal to 100:
+			set {_progress::%{_loop}%} to "&a100"
+			set {_progress::lvl} to {_loop}
+		add 1 to {_loop}
+	return "%{_progress::1}%;%{_progress::2}%;%{_progress::3}%;%{_progress::4}%;%{_progress::5}%;%{_progress::6}%;%{_progress::7}%;%({_progress::lvl} + 1)%"
+	
+command /reset:
+	trigger:
+		clear {h::*}
+
+
+function time():
+	# Récupération du temps actuel
+	set {_time} to time of "world"
+	
+	loop 3 times:
+		set time of "world" to night
+		wait 3 ticks
+		set time of "world" to day
+		wait 3 ticks
+	
+	# Réinitialisation du temps
+	set time of "world" to {_time}
+
+function cooldown(p: player):
+	set {h::cooldown::%{_p}%} to true
+	set {_cooldown} to 5
+	
+	# Le while est utile si l'on veut afficher le temps restant (inutile dans ce skript)
+	while {_cooldown} is set:
+		remove 1 from {_cooldown}
+		wait 1 second
+		if {_cooldown} is smaller or equal to 0:
+			clear {_cooldown}
+	clear {h::cooldown::%{_p}%}
+
+function music(p: player):
+	set {_pitch} to 1
+	loop 100 times:
+		if mod({_pitch}, 2) is 0:
+			play sound "BLOCK_NOTE_BLOCK_XYLOPHONE" with volume 10 and pitch {_pitch} to {_p}
+		if mod({_pitch}, 2) is 1:
+			play sound "BLOCK_NOTE_BLOCK_CHIME" with volume 10 and pitch {_pitch} to {_p}
+		add 1 to {_pitch}
+		wait 1 tick
+	loop 4 times:
+		play sound "ENTITY_GHAST_SCREAM" with volume 10 and pitch {_pitch} to {_p}
+		wait 1 second
+	wait 10 ticks
+	play sound "ENTITY_ENDERMAN_SCREAM" with volume 10 and pitch 1 to {_p}
+	wait 10 ticks
+	play sound "ENTITY_ELDER_GUARDIAN_CURSE" with volume 10 and pitch 1 to {_p}
+
+#--------------------------------------------------------------------------------- DEFI 1 ---------------------------------------------------------------------------------
+
+on break of pumpkin:
+
+	# Vérification si le bloc n'est pas blacklisté
+	if {h::blacklist::*} contains position of event-block:
+		stop
+		
+	# Chance de 10.00% de donner une tête de citrouille
+	chance of 10%:
+		give 1 player head named "&eTête de citrouille" with nbt "{display:{Name:""Jack O'Lantern""},SkullOwner:{Id:""bc47ece8-5ad0-4e29-a8e4-b30abe924e0f"",Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzYxM2U2NWVkZWZlNTY2MzgwOTE0M2RmZThhMmRlNjNiNzUwYTQ1NDc5OTRiNzllN2I5MmJhOTdiZWFlYWU0YyJ9fX0=""}]}}}" with lore "&f&l" and "&8/halloween pour plus d'informations" to player
+		strike lightning at event-block
+		add 1 to {h::pumpkin::%player%}
+		if {h::cooldown::%player%} is not set:
+			play sound "ENTITY_ELDER_GUARDIAN_CURSE" with volume 10 and pitch 1 to player
+			send ""
+			send "&a&lSUPER!&7 Tu as récupéré une &etête de citrouille&7 !"
+			send "&8(J'espère ne pas t'avoir fait trop peur ?)"
+			send ""
+		loop 10 times:
+			spawn bat at event-block
+		time()
+		if {h::cooldown::%player%} is not set:
+			cooldown(player)
+			wait 1 second
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to player
+
+on place of pumpkin:
+
+	# Ajout du bloc à la blacklist
+	add position of event-block to {h::blacklist::*}
+
+#--------------------------------------------------------------------------------- DEFI 2 ---------------------------------------------------------------------------------
+
+on place of player head:
+
+	# Vérification si le bloc est une tête de citrouille
+	nbt of block contains "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzYxM2U2NWVkZWZlNTY2MzgwOTE0M2RmZThhMmRlNjNiNzUwYTQ1NDc5OTRiNzllN2I5MmJhOTdiZWFlYWU0YyJ9fX0="
+	if block under event-block is soul sand:
+		
+		# Vérifie combien de têtes il y a dans un rayon de 2 blocs
+		loop blocks in radius 2 around event-block:
+			if "%loop-value%" contains "player head":
+				add 1 to {_head}
+				
+		# Vérifie s'il y a 3 têtes de citrouilles
+		if {_head} is greater or equal to 3:
+			loop blocks in radius 3 around event-block:
+				if "%loop-value%" contains "player head" or "soul sand":
+					set loop-value to air
+			set weather to thunder
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to player
+			send ""
+			send "&a&lSUPER!&7 Tu as invoqué un &eZombie-Citrouille&7 !"
+			send "&8(Note: /halloween pour plus d'informations)"
+			send ""
+			time()
+			set {h::invo::%player%} to true
+			spawn 1 zombie
+			set {_zombie} to last spawned entity
+			add uuid of last spawned entity to {h::zombies::*}
+			add "{PersistenceRequired:0b,LeftHanded:0,CanPickUpLoot:1b,Health:200,Attributes:[{Name:""generic.maxHealth"",Base:200},{Name:""generic.movementSpeed"",Base:0.5f},{Name:""generic.attackDamage"",Base:3}],Fire:1277951,ArmorItems:[{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:chainmail_boots"",Count:1},{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:golden_leggings"",Count:1},{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:golden_chestplate"",Count:1},{id:""minecraft:player_head"",tag:{SkullOwner:MHF_Pumpkin},Count:1}],ActiveEffects:[{Id:12,Amplifier:0,Duration:2147483647}]}" to nbt of last spawned entity
+			loop 10 times:
+				spawn bat at position of {_zombie}
+			wait 2 seconds
+			loop 10 times:
+				strike lightning at position of {_zombie}
+				play sound "ENTITY_ELDER_GUARDIAN_DEATH" with volume 10 and pitch 1 to player
+				wait 10 ticks
+			set {_pos} to "%position of player%"
+			replace all "x:" with "" in {_pos}
+			replace all "y:" with "" in {_pos}
+			replace all "z:" with "" in {_pos}
+			broadcast "&c&lATTENTION!&7 &e%player%&7 a invoqué un &eZombie-Citrouille&7 !"
+			broadcast "&8(Note: rejoignez-le en %{_pos}% !)"
+		else:
+			send action bar "&eIl te manque &6%3 - {_head}%&6 tête(s) de citrouille&e." to player
+	else:
+		cancel event
+		send ""
+		send "&c&lOUPS! &7Vous ne pouvez poser cette &etête de citrouille&7 que sur du sable des âmes. &8(/halloween pour plus d'informations)"
+		send ""
+
+#--------------------------------------------------------------------------------- DEFI 3 ---------------------------------------------------------------------------------
+
+on death of zombie:
+
+	# Vérifie si c'est un Zombie-Citrouille
+	if {h::zombies::*} contains uuid of victim:
+		remove uuid of victim from {h::zombies::*}
+		if attacker is set:
+			broadcast "&a&lSUPER!&e %attacker% &7a tué le Zombie-Citrouille !"
+			add 1 to {h::kill::%attacker%}
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to attacker
+			send "" to attacker
+			send "&a&lSUPER!&7 Tu as tué le &eZombie-Citrouille&7 !" to attacker
+			send "&8(Note: /halloween pour plus d'informations)" to attacker
+			send "" to attacker
+		loop 10 times:
+			spawn phantom at position of victim
+			add uuid of last spawned entity to {h::phantom::*}
+		time()
+
+on damage of zombie:
+
+	# Vérifie si c'est un Zombie-Citrouille
+	if {h::zombies::*} contains uuid of victim:
+		if tool of attacker is a bamboo:
+			kill victim
+			add 1 to {h::kill::%attacker%}
+			broadcast "&a&lSUPER!&e %attacker% &7a tué le Zombie-Citrouille !"
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to attacker
+			send "" to attacker
+			send "&a&lSUPER!&7 Tu as tué le &eZombie-Citrouille&7 !" to attacker
+			send "&8(Note: /halloween pour plus d'informations)" to attacker
+			send "" to attacker
+			stop
+		set {_health} to health of victim
+		set {_prc} to {_health} / 91 * 100
+		send action bar "&6&l» &eVie: &c%round({_prc})%%% &6&l«" to attacker
+
+#--------------------------------------------------------------------------------- DEFI 4 ---------------------------------------------------------------------------------
+
+on death of phantom:
+	if attacker is set:
+	
+		# Vérifie si c'est un Phantom généré par le Skript
+		if {h::phantom::*} contains uuid of victim:
+			set {_r} to random integer between 1 and 10
+			loop {_r} times:
+				drop 1 diamond named "&bCristal" with lore "" and "&8/halloween pour plus d'informations" at victim
+				wait 2 ticks
+			add {_r} to {h::diamond::%attacker%}
+			
+			# Adaptation du français
+			if {_r} is 1:
+				send "&a&lSUPER!&7 Voici votre récompense : &b%{_r}% &bcristal&7 !" to attacker
+				stop
+			send "&a&lSUPER!&7 Voici votre récompense : &b%{_r}% &bcristaux&7 !" to attacker
+
+#--------------------------------------------------------------------------------- DEFI 5 ---------------------------------------------------------------------------------
+
+on craft dolphin egg:
+
+	# Vérifie s'il n'a pas déjà crafté un oeuf
+	if {h::craft::%player%} is not set:
+		set {h::craft::%player%} to true
+		play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to player
+		send "" 
+		send "&a&lSUPER!&7 Tu as crafté le &eDauphin Mignon&7 !"
+		send "&8(Note: /halloween pour plus d'informations)"
+		send ""
+		stop
+	cancel event
+	send "&c&lOUPS!&7 Tu as déjà craftéce &eDauphin Mignon&7 !"
+
+#--------------------------------------------------------------------------------- DEFI 6 ---------------------------------------------------------------------------------
+
+on spawn of dolphin:
+
+	# Vérifie si l'oeuf est un Dauphin Mignon
+	if name of entity is "&cD&aa&eu&6p&dh&bi&en &em&bi&dg&cn&ao&6n":
+		loop all players in radius 10 around event-entity:
+			add loop-value to {_pl::*}
+			set {h::spawn::%loop-value%} to true
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to loop-value
+			send "" to loop-value
+			send "&a&lSUPER!&7 Tu as invoqué un &eDauphin Mignon&7 !" to loop-value
+			send "&8(Note: /halloween pour plus d'informations)" to loop-value
+			send "" to loop-value
+		wait 4 seconds
+		set {_pos} to position of event-entity
+		kill event-entity
+		play sound "ENTITY_ELDER_GUARDIAN_CURSE" with volume 10 and pitch 1 to {_pl::*}
+		music({_pl::*})
+		loop 20 times:
+			strike lightning at {_pos}
+			wait 5 ticks
+		wait 4 seconds
+		loop all blocks in radius 3 around {_pl::1}:
+			if loop-block is air:
+				chance of 10%:
+					add position of loop-block to {_loop::*}
+		spawn a pillager at {_loop::*}
+		spawn a vex at {_loop::1}
+		add "{PersistenceRequired:0b,Glowing:1,CanPickUpLoot:0b,Health:250,Attributes:[{Name:""generic.maxHealth"",Base:250}],ArmorItems:[{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:chainmail_boots"",Count:1},{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:golden_leggings"",Count:1},{tag:{Enchantments:[{id:protection,lvl:4}]},id:""minecraft:golden_chestplate"",Count:1},{id:""minecraft:player_head"",tag:{SkullOwner:MHF_Pumpkin},Count:1}]}" to nbt of last spawned entity
+		add uuid of last spawned entity to {h::vex::*}
+		play sound "ENTITY_ENDERMAN_SCREAM" with volume 10 and pitch 1 to {_pl::*}
+		time()
+		strike lightning at {_pl::*}
+		set {_pos} to "%position of {_pl::1}%"
+		replace all "x:" with "" in {_pos}
+		replace all "y:" with "" in {_pos}
+		replace all "z:" with "" in {_pos}
+		broadcast "&c&lATTENTION!&7 &e%{_pl::1}%&7 a invoqué le &eDieu des Citrouilles&7 !"
+		broadcast "&8(Note: rejoignez-le en %{_pos}% !)"
+
+#--------------------------------------------------------------------------------- DEFI 6 ---------------------------------------------------------------------------------
+
+on damage of vex:
+	
+	# Vérifie si c'est un Dieu des Citrouilles
+	if {h::vex::*} contains uuid of victim:
+		set {_health} to health of victim
+		set {_prc} to {_health} / 125 * 100
+		send action bar "&6&l» &eVie: &c%round({_prc})%%% &6&l«" to attacker
+
+on death of vex:
+
+	# Vérifie si c'est un Dieu des Citrouilles
+	if {h::vex::*} contains uuid of victim:
+		remove uuid of victim from {h::vex::*}
+		if attacker is set:
+			broadcast "&a&lSUPER!&e %attacker% &7a tué le &eDieu des Citrouilles !"
+			set {h::god::%attacker%} to true
+			play sound "UI_TOAST_CHALLENGE_COMPLETE" with volume 10 and pitch 1 to attacker
+			send "" to attacker
+			send "&a&lSUPER!&7 Tu as tué le &eDieu des Citrouilles&7 !" to attacker
+			send "&8(Note: /halloween pour plus d'informations)" to attacker
+			send "" to attacker
+
+#--------------------------------------------------------------------------------- COMMANDES, GUI ---------------------------------------------------------------------------------
+
+#NOTE: Cette partie n'est pas complètement optimisée dûe à mon manque de temps pour finaliser cette partie.
+
+command /halloween:
+	trigger:
+		# Affichage du coffre
+		open virtual chest with 5 rows named "" to player
+		
+		
+		# Décor du GUI
+		set {_num} to 0
+		loop 9 times:
+			if mod({_num}, 2) is 0:
+				format gui slot {_num} of player with yellow stained glass pane named " "
+			else:
+				format gui slot {_num} of player with orange stained glass pane named " "
+			add 1 to {_num}
+		set {_num} to 36
+		loop 8 times:
+			if mod({_num}, 2) is 0:
+				format gui slot {_num} of player with yellow stained glass pane named " "
+			else:
+				format gui slot {_num} of player with orange stained glass pane named " "
+			add 1 to {_num}
+		format gui slot 9, 17, 27 and 35 of player with orange stained glass pane named " "
+		format gui slot 18 and 26 of player with yellow stained glass pane named " "
+		format gui slot 44 of player with paper named "&6Informations utiles" with lore "", "&f-&6 /emergency&e:&7 En cas de problème avec un monstre", "&7important comme le &eZombie-Citrouille&7 ou le &eDieu des", "&eCitrouilles&7, éxécutez cette commande afin de les tuer.", "", "&f-&6 /reward&e:&7 Si vous avez terminé les défis,", "&7récupérez votre récompense !", "", "&cEn cas de problème ou si vous avez une", "&cquestion, contactez &6Romitou&e&o##9685&c, merci !" and ""
+		
+		
+		# Initialisation des statistiques
+		set {_output::*} to getLevel(player) split at ";"
+		set {_loop} to 1
+		while {_loop} is not 8:
+			set {_progress::%{_loop}%} to {_output::%{_loop}%} 
+			add 1 to {_loop}
+		set {_progress::lvl} to {_output::8} parsed as integer
+
+
+		# ETAPE 1
+		format gui slot 10 of player with lit pumpkin named "&6Défi 1: &eTête de citrouille" with lore "", "&7Difficulté: &aFacile", "&7Progression: &c%{_progress::1}%%%" and ""
+		format gui slot 19 of player with enchanted book named "&6Défi 1:&e Explications" with lore "", "&7Brrr... Il se passe des choses étranges.", "&7Certaines citrouilles semblent être hantées !", "", "&6&l» &fCollectez des citrouilles afin de", "&frécupérer des &etêtes de citrouilles&f." and ""
+		if {_progress::1} is "&a100":
+			set {_1} to light green dye named "&6Défi 1: &acomplété" with lore "", "&7Bouuh.. Félicitations !","&7Passez au &eDéfi 2&7 !" and ""
+		else:
+			set {_1} to red dye named "&6Défi 1:&e en cours" with lore "", "&7Allez, plus vite que ça, vous allez","&7bientôt pouvoir passez au &eDéfi 2&7 !" and ""
+		format gui slot 28 of player with {_1}
+
+
+		# ETAPE 2
+		set {_pu} to player head with nbt "{display:{Name:""Jack O'Lantern""},SkullOwner:{Id:""bc47ece8-5ad0-4e29-a8e4-b30abe924e0f"",Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzYxM2U2NWVkZWZlNTY2MzgwOTE0M2RmZThhMmRlNjNiNzUwYTQ1NDc5OTRiNzllN2I5MmJhOTdiZWFlYWU0YyJ9fX0=""}]}}}"
+		format gui slot 11 of player with {_pu} named "&6Défi 2: &eInvocation" with lore "", "&7Difficulté: &aFacile", "&7Progression: &c%{_progress::2}%%%" and ""
+		format gui slot 20 of player with enchanted book named "&6Défi 2:&e Explications" with lore "", "&7La rumeur raconte que si vous placez trois &etêtes de citrouille", "&7rapprochées sur du sable des âmes, une créature maléfique", "&7invoquée par le &eDieu des Citrouilles&7 viendra vous manger...", "", "&6&l» &fInvoquez le &eZombie-Citrouille&f en alignant", "&e3 têtes de citrouille&f sur du sable des âmes." and ""
+		if {_progress::lvl} is greater or equal to 2:
+			if {_progress::2} is "&a100":
+				set {_2} to light green dye named "&6Défi 2: &acomplété" with lore "", "&7Waow.. Bravo !","&7Passez au &eDéfi 3&7 !" and ""
+			else:
+				set {_2} to red dye named "&6Défi 2: &een cours" with lore "", "&7Bon, du nerf bon sang !","&7Bientôt le &eDéfi 3&7 !" and ""
+		else:
+			set {_2} to barrier named "&6Défi 2:&c bloqué" with lore "", "&7Bon, du nerf bon sang !", "&7Terminez votre &eDéfi %{_progress::lvl}%&7 !" and ""
+		format gui slot 29 of player with {_2}
+		
+		# ETAPE 3
+		format gui slot 12 of player with bamboo named "&6Défi 3: &eZombie-Citrouille" with lore "", "&7Difficulté: &eModéré", "&7Progression: &c%{_progress::3}%%%", "" and "&8(attention, easter egg)"
+		format gui slot 21 of player with enchanted book named "&6Défi 3:&e Explications" with lore "", "&7La rapidité du &eZombie-Citrouille&7 vous a coupé le", "&7souffle. Même avec sa tête en forme de citrouille,", "&7on l'appelle tous Usain Bolt.", "", "&6&l» &fTuez le &eZombie-Citrouille&f deux fois", "&f(faites attention aux éclairs et à sa rapidité)." and ""
+		if {_progress::lvl} is greater or equal to 3:
+			if {_progress::3} is "&a100":
+				set {_3} to light green dye named "&6Défi 3: &acomplété" with lore "", "&7Fiou.. C'était comment ?","&7Allez, zou, au &eDéfi 4&7 !" and ""
+			else:
+				set {_3} to red dye named "&6Défi 3: &een cours" with lore "", "&7Bon, c'est bientôt fini ?","&7Le &eDéfi 4&7 vous attends !" and ""
+		else:
+			set {_3} to barrier named "&6Défi 3:&c bloqué" with lore "", "&7Bon, c'est bientôt fini ?","&7Le &eDéfi %{_progress::lvl}%&7 n'est pas terminé !" and ""
+		format gui slot 30 of player with {_3}
+
+
+		# ETAPE 4
+		format gui slot 13 of player with diamond named "&6Défi 4: &eCristaux" with lore "", "&7Difficulté: &eModéré", "&7Progression: &c%{_progress::4}%%%" and ""
+		format gui slot 22 of player with enchanted book named "&6Défi 4:&e Explications" with lore "", "&7Le &eDieu des Citrouilles&7 raconte que l'âme de son dernier", "&eZombie-Citrouille &7est complètement remplie de Phantom.", "&7Tuez-les et récupérez des &bCristaux&7 !", "", "&6&l» &fTuez les Phantom libérés à la mort du", "&eZombie-Citrouille&f et récupérez &b80 Cristaux&f." and ""
+		if {_progress::lvl} is greater or equal to 4:
+			if {_progress::4} is "&a100":
+				set {_4} to light green dye named "&6Défi 4: &acomplété" with lore "", "&7Fiou.. C'était comment ?","&7Allez, zou, au &eDéfi 5&7 !" and ""
+			else:
+				set {_4} to red dye named "&6Défi 4: &cen cours" with lore "", "&7Vous avez fini de faire le pitre ?","&7Dépêchez-vous, le &eDéfi 5&7 vous attends !" and ""
+		else:
+			set {_4} to barrier named "&6Défi 4:&c bloqué" with lore "", "&7Vous avez fini de faire le pitre ?","&7Dépêchez-vous de faire le &eDéfi %{_progress::lvl}%&7 !" and ""
+		format gui slot 31 of player with {_4}
+
+
+		# ETAPE 5
+		format gui slot 14 of player with dolphin egg named "&6Défi 5: &eDauphin Mignon" with lore "", "&7Difficulté: &aFacile", "&7Progression: &c%{_progress::5}%%%" and ""
+		format gui slot 23 of player with enchanted book named "&6Défi 5:&e Explications" with lore "", "&7Les &bCristaux&7 sont tellement magiques, qu'ils", "&7sont capables de crafter un dauphin !", "", "&6&l» &fAvec vos &bCristaux&f, remplissez toutes les cases", "&fde la table de craft, sauf au milieu avec une &aÉmeraude&f." and ""
+		if {_progress::lvl} is greater or equal to 5:
+			if {_progress::5} is "&a100":
+				set {_5} to light green dye named "&6Défi 5: &acomplété" with lore "", "&7Bouuh.. Félicitations !","&7Passez au &eDéfi 6&7 !" and ""
+			else:
+				set {_5} to red dye named "&6Défi 5:&e en cours" with lore "", "&7Allez, plus vite que ça, vous allez","&7bientôt pouvoir passez au &eDéfi 6&7 !" and ""
+		else:
+			set {_5} to barrier named "&6Défi 4:&c bloqué" with lore "", "&7Allez, plus vite que ça, vous allez","&7bientôt pouvoir passez au &eDéfi 6&7 !" and ""
+		format gui slot 32 of player with {_5}
+
+
+		# ETAPE 6
+		format gui slot 15 of player with trident named "&6Défi 6: &eCréation du dauphin" with lore "", "&7Difficulté: &aFacile", "&7Progression: &c%{_progress::6}%%%" and ""
+		format gui slot 24 of player with enchanted book named "&6Défi 6:&e Explications" with lore "", "&7Oww... Libérez votre oeuf de dauphin, il a", "&7l'air si mignon ! Ne vous inquiétez", "&7pas, il ne vous fera aucun mal...", "", "&6&l» &fCréez le &eDauphin Mignon&f le faisant", "&fapparaître au sol car il n'aime pas l'eau." and ""
+		if {_progress::lvl} is greater or equal to 6:
+			if {_progress::6} is "&a100":
+				set {_6} to light green dye named "&6Défi 6: &acomplété" with lore "", "&7Waow.. Bravo !","&7Passez au &eDéfi 7&7 !" and ""
+			else:
+				set {_6} to red dye named "&6Défi 6: &een cours" with lore "", "&7Bon, du nerf bon sang !","&7Bientôt le &eDéfi 7&7 !" and ""
+		else:
+			set {_6} to barrier named "&6Défi 6:&c bloqué" with lore "", "&7Bon, du nerf bon sang !", "&7Terminez votre &eDéfi %{_progress::lvl}%&7 !" and ""
+		format gui slot 33 of player with {_6}
+
+
+		# ETAPE 7
+		format gui slot 16 of player with nether star named "&6Défi 7: &eDieu des Citrouilles" with lore "", "&7Difficulté: &cDifficile", "&7Progression: &c%{_progress::7}%%%" and ""
+		format gui slot 25 of player with enchanted book named "&6Défi 7:&e Explications" with lore "", "&7Vous vous êtes laissé bercé par ce dauphin", "&7si mignon ... Mais c'était un piège ! :(", "&7Le &eDieu des Citrouilles&7 est venu en personne.", "", "&6&l» &fTuez le &eDieu des Citrouilles&f", "&f(faites attention, il traverse les murs)." and ""
+		if {_progress::lvl} is greater or equal to 7:
+			if {_progress::7} is "&a100":
+				set {_7} to emerald named "&6Défi 7: &acomplété" with lore "", "&7Félicitations, vous avez tout terminé !","&6&l» &e/reward&f pour votre récompense !" and ""
+			else:
+				set {_7} to red dye named "&6Défi 7: &een cours" with lore "", "&7Bon, c'est bientôt fini ?","&7Il ne reste plus que lui !" and ""
+		else:
+			set {_7} to barrier named "&6Défi 7:&c bloqué" with lore "", "&7Bon, c'est bientôt fini ?","&7Le &eDéfi %{_progress::lvl}%&7 n'est pas terminé !" and ""
+		format gui slot 34 of player with {_7}
+		
+command /emergency:
+	trigger:
+		loop all entities in radius 5 around player:
+			if loop-entity is a vex:
+				if {h::vex::*} contains uuid of loop-entity:
+					remove uuid of loop-entity from {h::vex::*}
+					kill loop-entity
+					set {_mob} to "&6Dieu des Citrouilles"
+			if loop-entity is a zombie:
+				if {h::zombies::*} contains uuid of loop-entity:
+					remove uuid of loop-entity from {h::zombies::*}
+					kill loop-entity
+					set {_mob} to "&6Zombie-Citrouille"
+		if {_mob} is set:
+			broadcast "&6&lOUF!&e %player%&7 a paniqué et a déclenché la commande d'urgence contre le &e%{_mob}%&7 !"
+			stop
+		send "&c&lOUPS!&7 Aucune entité venue d'&6Halloween&7 n'est dans les parages..."
+
+command /reward:
+	trigger:
+		if {h::god::%player%} is true:
+			if {h::claim::%player%} is not set:
+				set {h::claim::%player%} to true
+				give a nether star to player
+				give 20 diamonds to player
+				give 5 emeralds to player
+				give book of sharpness 5 to player
+				send "&a&lSUPER!&7 Tu as récupéré ta récompense !"
+			else:
+				send "&c&lOUPS!&7 Tu as déjà récupéré ta récompense."
+		else:
+			send "&c&lOUPS!&7 Tu n'as pas la permission d'éxécuter cette commande."
+
+on join:
+	wait 10 ticks
+	send "&a&lSALUT!&7 Les défis d'&eHalloween&7 sont arrivés !"
+	send "&8(/halloween pour plus d'informations)"

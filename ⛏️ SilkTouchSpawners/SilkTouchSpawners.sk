@@ -1,0 +1,58 @@
+options:
+	sts: SilkTouchSpawners
+
+on load:
+	load yaml "SilkTouchSpawners/spawners.yml" as "spawners"
+	load yaml "SilkTouchSpawners/config.yml" as "config"
+	if yaml value "mode" from "config" is not set:
+		set yaml value "mode" from "config" to "false"
+
+command /silktouchspawners [<text>] [<text>]:
+	aliases: sts
+	trigger:
+		if arg-1 is "mode":
+			set {_status} to yaml value "mode" from "config"
+			if {_status} is false:
+				set yaml value "mode" from "config" to true
+				send ""
+				send "&6[{@sts}]&f Le procédé de sorcellerie a été &aactivé&f."
+				send "&7(Note: les joueurs pourront récupérer des générateurs)"
+				send ""
+			else if {_status} is true:
+				set yaml value "mode" from "config" to "false"
+				send ""
+				send "&6[{@sts}]&f Le procédé de sorcellerie a été &cdésactivé&f."
+				send "&7(Note: aucun joueur ne pourra récupérer de générateur)"
+				send ""
+			save yaml "config"
+
+function spawner(p: player, nbt: text):
+	set {_id} to "%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%-%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%-%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%%random integer from 1 to 9%"
+	set yaml value "%{_id}%" from "spawners" to "%{_nbt}%"
+	give {_p} spawner with lore "" and "&8(##%{_id}%)"
+	send "&a&lSUPER! &7Votre générateur a été sauvegardé et sera restauré quand vous le poserez." to {_p}
+	save yaml "spawners"
+	
+	
+on break of spawner:
+	if game mode of player is survival:
+		if yaml value "mode" from "config" is true:
+			if tool of player is any pickaxe:
+				if level of silk touch of tool of player is greater than or equal to 1:
+					set {_nbt} to nbt of targeted block
+					spawner(player, {_nbt})
+					stop
+		send "&c&lOUPS! &7La transformation des générateur est actuellement &cdésactivée&f."
+		cancel event
+
+
+
+on place of spawner:
+	set {_lore1::*} to lore of player's tool
+	set {_lore} to unformatted {_lore1::2}
+	replace all "(", ")" and "##" with "" in {_lore}
+	if yaml value "%{_lore}%" from "spawners" exists:
+		set {_nbt} to yaml value "%{_lore}%" from "spawners"
+		set nbt of event-block to "%{_nbt}%"
+		send "&a&lSUPER! &7Votre générateur a été restauré avec &asuccès&f."
+		delete value "%{_lore}%" from "spawners"

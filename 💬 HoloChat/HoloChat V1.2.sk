@@ -1,0 +1,117 @@
+#   /$$   /$$           /$$            /$$$$$$  /$$       V1.1        /$$        | Ce script requiert Sk-NBeeT, permettant de gérer les NBT des entités sur votre serveur.
+#  | $$  | $$          | $$           /$$__  $$| $$                  | $$        | Bien évidemment, il vous faudra de même avoir une version de Skript compatible avec celui-ci.
+#  | $$  | $$  /$$$$$$ | $$  /$$$$$$ | $$  \__/| $$$$$$$   /$$$$$$  /$$$$$$      |
+#  | $$$$$$$$ /$$__  $$| $$ /$$__  $$| $$      | $$__  $$ |____  $$|_  $$_/      | Il a été créé à la demande d'un utilisateur de Skript-MC, je le publie donc au public
+#  | $$__  $$| $$  \ $$| $$| $$  \ $$| $$      | $$  \ $$  /$$$$$$$  | $$        | dans les ressources de Skript-MC (https://skript-mc.fr/forum/files/file/310-holochat-affichez-votre-message-au-dessus-de-votre-tête/).
+#  | $$  | $$| $$  | $$| $$| $$  | $$| $$    $$| $$  | $$ /$$__  $$  | $$ /$$    |
+#  | $$  | $$|  $$$$$$/| $$|  $$$$$$/|  $$$$$$/| $$  | $$|  $$$$$$$  |  $$$$/    | Si toutesfois, vous souhaitez adresser une suggestion ou si vous avez un problème, n'hésitez
+#  |__/  |__/ \______/ |__/ \______/  \______/ |__/  |__/ \_______/   \___/      | pas à me contacter sur le Discord de Skript-MC ou sur mon compte personnel (Romitou#9685).
+# Avertissement : Sk-NBeeT est uniquement compatible avec les versions 1.8.8, 1.12.2, 1.14.4 et 1.15.2.
+
+on load:
+	if {holo::d} is not set:
+		set {holo::d} to 1 tick
+	if {holo::m} is not set:
+		set {holo::m} to "&7[JOUEUR]&f: &7« [MESSAGE] »"
+function HoloChat(action: text, p: player, msg: text):
+	if {_action} is "chat":
+		set {_out} to {holo::m}
+		replace all "[JOUEUR]" with "%{_p}%" in {_out}
+		replace all "[MESSAGE]" with "%{_msg}%" in {_out}
+		set {holo::c::%{_p}%} to true
+		spawn armor stand at position of {_p}
+		add "{Invisible:1b,Invulnerable:1b,NoBasePlate:1b,NoGravity:1b,CustomName:""{\""text\"":\""§7%{_out}%\""}"",CustomNameVisible:1b}" to nbt of last spawned entity
+		if {holo::d} is 1 tick:
+			set {_loop} to 100
+		if {holo::d} is 5 ticks:
+			set {_loop} to 20
+		if {holo::d} is 15 ticks:
+			set {_loop} to 7
+		if {holo::d} is 1 second:
+			set {_loop} to 5
+		loop {_loop} times:
+			teleport last spawned entity to position of {_p}
+			wait {holo::d}
+		kill last spawned entity
+		clear {holo::c::%{_p}%}
+	else if {_action} is "delay":
+		if {_msg} is "1":
+			set {holo::d} to 1 tick
+		else if {_msg} is "2":
+			set {holo::d} to 5 ticks
+		else if {_msg} is "3":
+			set {holo::d} to 15 ticks
+		else if {_msg} is "4":
+			set {holo::d} to 1 second
+		set {_delay} to "%{holo::d}%"
+		replace all "second" with "seconde" in {_delay}
+		send "&6[&eHoloChat&6]&f Le délai de téléportation de l'hologramme a été modifié à &b%{_delay}%&f." to {_p}
+	else if {_action} is "mode":
+		if {_msg} is "1":
+			set {holo::s} to "off"
+			send "&6[&eHoloChat&6]&f Le fonctionnement du HoloChat a été &cdésactivé&f." to {_p}
+		else if {_msg} is "2":
+			set {holo::s} to "holo"
+			send "&6[&eHoloChat&6]&f Le fonctionnement du HoloChat a été &eactivé (hologrammes uniquement)&f." to {_p}
+		else if {_msg} is "3":
+			set {holo::s} to "on"
+			send "&6[&eHoloChat&6]&f Le fonctionnement du HoloChat a été &aactivé&f." to {_p}
+	else if {_action} is "msg":
+		if {_msg} contains "%%msg":
+			replace all "%%p" with "[JOUEUR]" in {_msg}
+			replace all "%%msg" with "[MESSAGE]" in {_msg}
+			replace all "&" with "§" in {_msg}
+			set {holo::m} to {_msg}
+			send "" to {_p}
+			send "&6[&eHoloChat&6]&f Le message de l'hologramme a été modifié par :" to {_p}
+			send "&7%{_msg}%" to {_p}
+			send "" to {_p}
+on chat:
+	{holo::s} is not "off"
+	if {holo::s} is "holo":
+		cancel event
+	if {holo::c::%player%} is not set:
+		HoloChat("chat", player, message)
+		stop
+	cancel event
+	send "&6[&eHoloChat&6] &fMerci de patienter un peu avant de parler."
+command /hchat [<text>] [<text>]:
+	trigger:
+		if executor is not op:
+			send "&6[&eHoloChat&6]&f v1.0 - Romitou##9685"
+		else:
+			if arg-1 is "delay":
+				if arg-2 is not "1", "2", "3" or "4":
+					send ""
+					send "&6[&eHoloChat&6]&f Choisissez le délai de téléportation de l'hologramme :"
+					send ""
+					send formatted "       &c<tooltip:&c0.05 seconde><cmd:/hchat delay 1>[Très rapide]<reset>  &8-  &6<tooltip:&60.25 seconde><cmd:/hchat delay 2>[Rapide]<reset>  &8-  &e<tooltip:&e0.75 seconde><cmd:/hchat delay 3>[Modéré]<reset>  &8-  &a<tooltip:&a1 seconde><cmd:/hchat delay 4>[Ralenti]<reset>"
+					send "      &7(peut causer des latences)"
+					send ""
+				else:
+					HoloChat("delay", player, arg-2)
+			else if arg-1 is "mode":
+				if arg-2 is not "1", "2" or "3":
+					send ""
+					send ""
+					send "&6[&eHoloChat&6]&f Choisissez le mode de fonctionnement du HoloChat :"
+					send formatted "       &c<tooltip:&cAucune modification du chat><cmd:/hchat mode 1>[Désactivé]<reset>  &8-  &e<tooltip:&eHologramme uniquement, chat désactivé><cmd:/hchat mode 2>[Hologramme uniquement]<reset>  &8-  &a<tooltip:&aHologramme et chat activés><cmd:/hchat mode 3>[Activé]<reset>"
+					send ""
+				else:
+					HoloChat("mode", player, arg-2)
+			else if arg-1 is "message":
+				if arg-2 is not set:
+					send ""
+					send "&6[&eHoloChat&6]&f Vous pouvez modifier le message affiché au dessus de la tête du joueur lorsqu'il parle, directement en jeu. Pour cela, faites &e/hchat message <message>&f."
+					send ""
+					send "&cAttention: dans votre message, vous devez obligatoirement insérer &6%%p&c pour le joueur ainsi que &6%%msg&c pour le message."
+					send ""
+				else:
+					HoloChat("msg", player, arg-2)
+			else:
+				send ""
+				send "&6[&eHoloChat&6]&f Voici les commandes disponibles :"
+				send formatted "&7-&e <tooltip:&e/hchat delay><cmd:/hchat delay>/hchat delay<reset>&f:&7 Délai de téléportation de l'hologramme"
+				send formatted "&7-&e <tooltip:&e/hchat mode><cmd:/hchat mode>/hchat mode<reset>&f:&7 Mode de fonctionnement de HoloChat"
+				send formatted "&7-&e <tooltip:&e/hchat message><cmd:/hchat message>/hchat message<reset>&f:&7 Personnalisation du message"
+				send ""

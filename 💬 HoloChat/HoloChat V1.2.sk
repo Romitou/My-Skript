@@ -6,6 +6,7 @@
 #  | $$  | $$| $$  | $$| $$| $$  | $$| $$    $$| $$  | $$ /$$__  $$  | $$ /$$    |
 #  | $$  | $$|  $$$$$$/| $$|  $$$$$$/|  $$$$$$/| $$  | $$|  $$$$$$$  |  $$$$/    | Si toutesfois, vous souhaitez adresser une suggestion ou si vous avez un problème, n'hésitez
 #  |__/  |__/ \______/ |__/ \______/  \______/ |__/  |__/ \_______/   \___/      | pas à me contacter sur le Discord de Skript-MC ou sur mon compte personnel (Romitou#9685).
+# Avertissement : Sk-NBeeT est uniquement compatible avec les versions 1.8.8, 1.12.2, 1.14.4 et 1.15.2.
 
 on load:
 	if {holo::d} is not set:
